@@ -35,6 +35,8 @@ public class LoginController {
             return "inicio";
         }
 
+        //Invocar servicio de autenticacion
+
 
         LoginModel loginModel = new LoginModel("00", "", "Cesar Santos");
         model.addAttribute("loginModel", loginModel);
