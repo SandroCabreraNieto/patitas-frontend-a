@@ -37,7 +37,7 @@ public class LoginController {
                 numeroDocumento == null || numeroDocumento.trim().length() == 0 ||
                 password == null || password.trim().length() == 0) {
 
-            LoginModel loginModel = new LoginModel("01", "Error: Debe completar correctamente sus credenciale", "");
+            LoginModel loginModel = new LoginModel("01", "Error: Debe completar correctamente sus credenciales", "");
             model.addAttribute("loginModel", loginModel);
             return "inicio";
         }
@@ -47,7 +47,7 @@ public class LoginController {
             LoginRequestDTO loginRequest = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
 
             //Consumir API
-            LoginResponseDTO response = restTemplate.postForObject("http://localhost:8081/autenticacion/login", loginRequest, LoginResponseDTO.class);
+            LoginResponseDTO response = restTemplate.postForObject("http://localhost:8082/autenticacion/login", loginRequest, LoginResponseDTO.class);
 
             if (response != null && "00".equals(response.codigo())) {
                 LoginModel loginModel = new LoginModel("00", "", response.nombreUsuario());
