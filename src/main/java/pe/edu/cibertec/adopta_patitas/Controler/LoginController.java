@@ -12,12 +12,14 @@ import pe.edu.cibertec.adopta_patitas.dto.LoginRequestDTO;
 import pe.edu.cibertec.adopta_patitas.dto.LoginResponseDTO;
 import pe.edu.cibertec.adopta_patitas.viewmodel.LoginModel;
 
+import java.time.Duration;
+
 @Controller
 @RequestMapping("/login")
 public class LoginController {
 
     @Autowired
-    private RestTemplate restTemplate;
+    RestTemplate restTemplate;
 
     @GetMapping("/inicio")
     public String inicio(Model model) {
@@ -32,7 +34,7 @@ public class LoginController {
                              @RequestParam("password") String password,
                              Model model) {
 
-        //Validar campos de entrada
+        // Validar campos de entrada
         if (tipoDocumento == null || tipoDocumento.trim().length() == 0 ||
                 numeroDocumento == null || numeroDocumento.trim().length() == 0 ||
                 password == null || password.trim().length() == 0) {
@@ -40,23 +42,39 @@ public class LoginController {
             LoginModel loginModel = new LoginModel("01", "Error: Debe completar correctamente sus credenciales", "");
             model.addAttribute("loginModel", loginModel);
             return "inicio";
+
         }
 
-        //Invocar servicio de autenticacion
-            //Objeto para la solicitud
-            LoginRequestDTO loginRequest = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
+        try {
 
-            //Consumir API
-            LoginResponseDTO response = restTemplate.postForObject("http://localhost:8082/autenticacion/login", loginRequest, LoginResponseDTO.class);
+            // Invocar servicio de autenticación
+            String endpoint = "http://localhost:8082/autenticacion/login";
+            LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
+            LoginResponseDTO loginResponseDTO = restTemplate.postForObject(endpoint, loginRequestDTO, LoginResponseDTO.class);
 
-            if (response != null && "00".equals(response.codigo())) {
-                LoginModel loginModel = new LoginModel("00", "", response.nombreUsuario());
+            if (loginResponseDTO.codigo().equals("00")){
+
+                LoginModel loginModel = new LoginModel("00", "", loginResponseDTO.nombreUsuario());
                 model.addAttribute("loginModel", loginModel);
                 return "principal";
+
             } else {
-                LoginModel loginModel = new LoginModel("01", response.mensaje(), "");
+
+                LoginModel loginModel = new LoginModel("02", "Error: Autenticación fallida", "");
                 model.addAttribute("loginModel", loginModel);
                 return "inicio";
+
             }
+
+        } catch(Exception e) {
+
+            LoginModel loginModel = new LoginModel("99", "Error: Ocurrió un problema en la autenticación", "");
+            model.addAttribute("loginModel", loginModel);
+            System.out.println(e.getMessage());
+            return "inicio";
+
+        }
+
     }
+
 }
